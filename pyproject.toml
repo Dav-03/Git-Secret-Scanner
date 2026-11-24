@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "git-secret-scanner"
+version = "0.1.0"
+description = "Scan git commit history for hardcoded keys/secrets"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = []
+
+[project.scripts]
+secretscan = "secretscan.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6", "pytest-cov"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["secretscan"]
+
+[tool.ruff]
+line-length = 80
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
