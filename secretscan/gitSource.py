@@ -2,14 +2,16 @@ import subprocess
 from collections.abc import Iterator
 from pathlib import Path
 
-from diffParser import PREFIX, parse_difference
-from model import STAGED, addedLine
+from .diffParser import PREFIX, parse_difference
+from .model import STAGED, addedLine
 
 GIT = ["git", "-c", "core.quotepath=off"]
 DIFF_OPTIONS = ["--unified=0", "--no-color", "--no-ext-diff", "--no-textconv"]
 
+
 class GitError(RuntimeError):
     pass
+
 
 def ensureRepo(repo: str | Path) -> Path:
     repo = Path(repo).resolve()
@@ -18,7 +20,7 @@ def ensureRepo(repo: str | Path) -> Path:
             [*GIT, "-C", str(repo), "rev-parse", "--git-dir"],
             check=True,
             capture_output=True,
-            text=True
+            text=True,
         )
     except FileNotFoundError as error:
         raise GitError("git execuatable was not found on path") from error
@@ -46,8 +48,10 @@ def stream(repo: Path, args: list[str]) -> Iterator[str]:
         process.stderr.close()
         code = process.wait()
     if code != 0:
-        raise GitError(f"git {' '.join(args[:2])} failed ({code}): {error.strip()}")
-    
+        raise GitError(
+            f"git {' '.join(args[:2])} failed ({code}): {error.strip()}"
+        )
+
 
 # Scans for changes from previous commits
 def history(repo: Path | str) -> Iterator[addedLine]:

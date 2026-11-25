@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 STAGED = "STAGED"
 
+
 @dataclass(frozen=True, slots=True)
 class addedLine:
     commit: str

@@ -1,9 +1,11 @@
-from secretscan.diffParser import parse_diff
-from secretscan.model import AddedLine
+from secretscan.diffParser import parse_difference
+from secretscan.model import addedLine
 
 
-def _parse(text: str, commit: str = "") -> list[AddedLine]:
-    return list(parse_diff(text.splitlines(keepends=True), default_commit=commit))
+def _parse(text: str, commit: str = "") -> list[addedLine]:
+    return list(
+        parse_difference(text.splitlines(keepends=True), default_commit=commit)
+    )
 
 
 def test_single_commit_added_lines():
@@ -18,8 +20,8 @@ index 0000000..1111111
 +DEBUG = True
 """
     assert _parse(diff) == [
-        AddedLine("abc123", "config.py", 1, 'API_KEY = "x"'),
-        AddedLine("abc123", "config.py", 2, "DEBUG = True"),
+        addedLine("abc123", "config.py", 1, 'API_KEY = "x"'),
+        addedLine("abc123", "config.py", 2, "DEBUG = True"),
     ]
 
 
@@ -35,7 +37,11 @@ diff --git a/a.txt b/a.txt
 +x
 +y
 """
-    assert [(a.line_no, a.text) for a in _parse(diff)] == [(3, "new"), (11, "x"), (12, "y")]
+    assert [(a.line_number, a.text) for a in _parse(diff)] == [
+        (3, "new"),
+        (11, "x"),
+        (12, "y"),
+    ]
 
 
 def test_added_line_that_looks_like_header():
@@ -47,7 +53,10 @@ diff --git a/a.txt b/a.txt
 +++ not a header
 +--- also not a header
 """
-    assert [a.text for a in _parse(diff)] == ["++ not a header", "--- also not a header"]
+    assert [a.text for a in _parse(diff)] == [
+        "++ not a header",
+        "--- also not a header",
+    ]
 
 
 def test_deleted_file_yields_nothing():
@@ -73,7 +82,7 @@ diff --git a/b.txt b/b.txt
 @@ -0,0 +1 @@
 +hello
 """
-    assert _parse(diff) == [AddedLine("abc", "b.txt", 1, "hello")]
+    assert _parse(diff) == [addedLine("abc", "b.txt", 1, "hello")]
 
 
 def test_multiple_commits_and_files():
@@ -108,7 +117,7 @@ def test_no_newline_marker_and_crlf():
         "COMMIT:abc\r\ndiff --git a/w b/w\r\n--- /dev/null\r\n+++ b/w\r\n"
         "@@ -0,0 +1 @@\r\n+last\r\n\\ No newline at end of file\r\n"
     )
-    assert _parse(diff) == [AddedLine("abc", "w", 1, "last")]
+    assert _parse(diff) == [addedLine("abc", "w", 1, "last")]
 
 
 def test_quoted_path_with_space():
