@@ -1,0 +1,65 @@
+[[rules]]
+id = "aws-access-key-id"
+regex = '\b((?:AKIA|ASIA)[0-9A-Z]{16})\b'
+keywords = ["akia", "asia"]
+
+[[rules]]
+id = "github-token"
+regex = '\b(gh[pousr]_[A-Za-z0-9]{36})\b'
+keywords = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"]
+
+[[rules]]
+id = "github-fine-grained-pat"
+regex = '\b(github_pat_[A-Za-z0-9_]{82})\b'
+keywords = ["github_pat_"]
+
+[[rules]]
+id = "slack-token"
+regex = '\b(xox[baprs]-[0-9A-Za-z-]{10,})'
+keywords = ["xox"]
+
+[[rules]]
+id = "stripe-live-key"
+regex = '\b((?:sk|rk)_live_[0-9A-Za-z]{24,})'
+keywords = ["_live_"]
+
+[[rules]]
+id = "google-api-key"
+regex = '\b(AIza[0-9A-Za-z_\-]{35})'
+keywords = ["aiza"]
+
+[[rules]]
+id = "private-key"
+regex = '-----BEGIN (?:[A-Z]+ )?PRIVATE KEY(?: BLOCK)?-----'
+keywords = ["private key"]
+secret_group = 0
+
+[[rules]]
+id = "jwt"
+regex = '\b(eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})'
+keywords = ["eyj"]
+
+# Must stay last so specific rules claim a secret first.
+[[rules]]
+id = "generic-secret"
+regex = '''(?i)(?:api[_-]?key|secret|token|passw(?:or)?d)[a-z0-9_.-]*["']?\s*[:=]\s*["']([^"'\s]{16,})["']'''
+keywords = ["key", "secret", "token", "pass"]
+entropy = true
+
+# Paths and values that are never reported.
+# paths:     glob patterns; a pattern without "/" matches the file name
+#            anywhere, a pattern with "/" matches the full path
+#            ("*" also crosses folders, so "vendor/*" covers nested files)
+# stopwords: if the secret contains one of these (case-insensitive),
+#            it is a placeholder, not a real credential
+[allowlist]
+paths = [
+    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "poetry.lock",
+    "Pipfile.lock", "Cargo.lock", "go.sum", "composer.lock",
+    "*.min.js", "*.min.css", "*.map", "*.svg",
+    "node_modules/*", "vendor/*", "*/node_modules/*", "*/vendor/*",
+]
+stopwords = [
+    "example", "sample", "dummy", "placeholder", "changeme", "redacted",
+    "your_", "your-", "xxxxxx", "******", "<", ">", "${", "{{",
+]
