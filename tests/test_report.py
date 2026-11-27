@@ -3,11 +3,11 @@ from pathlib import Path
 import pytest
 
 from secretscan.cli import main
-from tests.fakes import fake
 from secretscan.model import addedLine
 from secretscan.report import to_text
 from secretscan.rules import load_config
 from secretscan.scanner import scan
+from tests.fakes import fake
 from tests.test_cli import make_repo
 
 CONFIG = load_config()

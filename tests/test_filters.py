@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from tests.fakes import ALNUM, fake, rand
 from secretscan.filters import (
     dedupe,
     fingerprint,
@@ -14,6 +13,7 @@ from secretscan.filters import (
 from secretscan.model import Found, addedLine
 from secretscan.rules import load_config
 from secretscan.scanner import scan
+from tests.fakes import ALNUM, fake, rand
 
 CONFIG = load_config()
 

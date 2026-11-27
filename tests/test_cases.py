@@ -1,12 +1,15 @@
 import subprocess
 from pathlib import Path
+
 import pytest
+
 from secretscan import gitSource
 from secretscan.cli import main
 from secretscan.diffParser import parse_difference
 from secretscan.gitSource import GitError, ensureRepo, stream
 from secretscan.model import Found
 from secretscan.rules import RuleError, load_config, load_rules
+
 
 def test_context_lines_advance_line_numbers():
     # Not produced with --unified=0, but the parser must still count them.

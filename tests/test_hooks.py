@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 
 from secretscan.cli import main
-from tests.fakes import fake
 from secretscan.gitSource import GitError
 from secretscan.hooks import MARKER, hooks_dir, install_hook
+from tests.fakes import fake
 
 
 def git(repo: Path, *args: str) -> subprocess.CompletedProcess:

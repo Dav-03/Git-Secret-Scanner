@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 from secretscan.detector import detect
-from tests.fakes import ALNUM, fake, rand
 from secretscan.model import addedLine
 from secretscan.rules import RuleError, load_rules
+from tests.fakes import ALNUM, fake, rand
 
 RULES = load_rules()
 

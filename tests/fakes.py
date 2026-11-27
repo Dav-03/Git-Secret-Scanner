@@ -30,4 +30,25 @@ def fake(rule_id: str) -> str:
         return f"auth: eyJ{parts[0]}.eyJ{parts[1]}.{parts[2]}"
     if rule_id == "generic-secret":
         return f'api_key = "{rand(ALNUM, 32)}"'
+    # Literal markers are split with + so this file never matches the rules.
+    if rule_id == "putty-private-key":
+        return "PuTTY-User-" + "Key-File-2: ssh-rsa"
+    if rule_id == "url-credentials":
+        return "DB = 'postgres://app" + ":" + rand(ALNUM, 15) + "9@db:5432/x'"
+    if rule_id == "password-hash":
+        salt, digest = rand(ALNUM, 8), rand(ALNUM + "./", 43)
+        return "root:" + "$6" + f"${salt}${digest}:19000:0:99999:7:::"
+    if rule_id == "netrc-password":
+        return "machine example.com login deploy " + "password " + \
+            rand(ALNUM, 11) + "7"
+    if rule_id == "php-define-secret":
+        return "define('DB_" + f"PASSWORD', '{rand(ALNUM, 11)}7');"
+    if rule_id == "xml-password":
+        return "<Pass>" + rand(ALNUM, 11) + "7</Pass>"
+    if rule_id == "generic-secret-unquoted":
+        return "AWS_SECRET_ACCESS_KEY" + "=" + rand(ALNUM, 39) + "7"
+    if rule_id == "password-assignment":
+        return 'db_password = "' + rand(ALNUM, 10) + '9"'
+    if rule_id == "password-env":
+        return "DB_PASSWORD" + "=" + rand(ALNUM, 10) + "9"
     raise KeyError(f"no fake secret generator for rule '{rule_id}'")

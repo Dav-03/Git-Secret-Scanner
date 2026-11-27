@@ -39,12 +39,69 @@ id = "jwt"
 regex = '\b(eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})'
 keywords = ["eyj"]
 
-# Must stay last so specific rules claim a secret first.
+[[rules]]
+id = "putty-private-key"
+regex = 'PuTTY-User-Key-File-\d+:'
+keywords = ["putty-user-key-file"]
+secret_group = 0
+
+[[rules]]
+id = "url-credentials"
+# Credentials embedded in a URL, before the @ sign.
+regex = '''[a-zA-Z][a-zA-Z0-9+.-]*://[^/\s:'"\[\](){}\\]+:([^/\s'"\[\](){}\\]+)@[^/\s@'"]+'''
+keywords = ["://"]
+
+[[rules]]
+id = "password-hash"
+# crypt(3) hashes in /etc/shadow, .htpasswd and FTP password files
+regex = '(\$(?:1|2[aby]?|5|6|apr1)\$[./A-Za-z0-9]{1,22}\$[./A-Za-z0-9]{8,})'
+keywords = ["$1$", "$2", "$5$", "$6$", "$apr1$"]
+
+[[rules]]
+id = "netrc-password"
+regex = '(?i)\bmachine\s+\S+\s+login\s+\S+\s+password\s+(\S+)'
+keywords = ["machine"]
+
+[[rules]]
+id = "php-define-secret"
+# WordPress-style define('DB_PASSWORD', '...') and AUTH_KEY / SALT values
+regex = '''(?i)define\(\s*['"][A-Z_]*(?:PASSWORD|KEY|SALT)['"]\s*,\s*['"]([^'"]{4,})['"]'''
+keywords = ["define("]
+
+[[rules]]
+id = "xml-password"
+regex = '''(?i)<pass(?:word)?\b[^>]*>([^<>"'\s]{4,})</pass(?:word)?>'''
+keywords = ["<pass"]
+
+# Generic rules last, so specific rules claim a secret first.
 [[rules]]
 id = "generic-secret"
-regex = '''(?i)(?:api[_-]?key|secret|token|passw(?:or)?d)[a-z0-9_.-]*["']?\s*[:=]\s*["']([^"'\s]{16,})["']'''
-keywords = ["key", "secret", "token", "pass"]
+regex = '''(?i)(?:api[_-]?key|secret|token|passw(?:or)?d|(?<![a-z])auth(?![a-z]))[a-z0-9_.-]*["']?\s*[:=]\s*["']([^"'\s]{16,})["']'''
+keywords = ["key", "secret", "token", "pass", "auth"]
 entropy = true
+
+[[rules]]
+id = "generic-secret-unquoted"
+# KEY=value / key: value in .env, shell, INI and YAML files. The value must
+# contain a digit and end the token, so code like settings.SECRET is skipped.
+regex = '''(?i)(?:api[_-]?key|secret|token|access[_-]?key|app[_-]?key|(?<![a-z])auth(?![a-z]))[a-z0-9_]*\s*[:=]\s*(?=[^\s"'$]*\d)([A-Za-z0-9+/=_:-]{16,})(?=$|[\s#;,])'''
+keywords = ["key", "secret", "token", "auth"]
+entropy = true
+
+[[rules]]
+id = "password-assignment"
+# Quoted password values. No entropy check: weak passwords are the common
+# case. The value must contain a digit or symbol, which skips placeholder
+# words like "default" or "test" in example code.
+regex = '''(?i)(?:passw(?:or)?d|passwd|passphrase|(?<![a-z])(?:pass|pwd)(?![a-z]))[a-z0-9_]*["']?\s*(?::|=>|=)\s*["']((?=[^"'\s]*[^A-Za-z"'\s])[^"'\s]{4,})["']'''
+keywords = ["pass", "pwd"]
+
+[[rules]]
+id = "password-env"
+# Whole-line NAME=value with no spaces, as in .env and INI files.
+# Same digit-or-symbol requirement as password-assignment.
+regex = '''(?i)^\s*(?:export\s+)?[a-z0-9_]*(?:passw(?:or)?d|passwd|_pass)=((?=[^\s"'$#]*[^A-Za-z\s"'$#])[^\s"'$#]{4,})\s*$'''
+keywords = ["pass"]
 
 # Paths and values that are never reported.
 # paths:     glob patterns; a pattern without "/" matches the file name
@@ -61,5 +118,6 @@ paths = [
 ]
 stopwords = [
     "example", "sample", "dummy", "placeholder", "changeme", "redacted",
-    "your_", "your-", "xxxxxx", "******", "<", ">", "${", "{{",
+    "your_", "your-", "xxxxxx", "******", "${", "{{",
+    "<insert", "<your", "<put", "<enter", "<replace", "unique phrase",
 ]
